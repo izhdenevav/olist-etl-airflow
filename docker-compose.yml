@@ -1,3 +1,8 @@
+# Сервисы:
+#   warehouse - база PostgreSQL, в которой лежат данные (наше "хранилище")
+#   airflow   - оркестратор, который запускает шаги пайплайна по порядку
+#   metabase  - необязательный сервис для дашбордов, запускается отдельно - "docker compose --profile bi up -d"
+
 services:
   warehouse:
     image: postgres:16
@@ -31,6 +36,15 @@ services:
       - ./dags:/opt/airflow/dags
       - ./sql:/opt/airflow/sql
       - ./data:/opt/airflow/data
+
+  metabase:
+    image: metabase/metabase:latest
+    profiles: ["bi"]
+    depends_on:
+      warehouse:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
 
 volumes:
   warehouse_data:
